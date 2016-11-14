@@ -1,0 +1,185 @@
+<%- include public/cwHead.html %>
+
+<form class="serverDown" action="/serverDown" method="post">
+    <table class="table table-bordered table-hover table-primary table-response">
+        <thead>
+        <tr>
+            <th class="text-center">编号</th>
+            <th class="text-center">状态</th>
+            <th class="text-center">带宽</th>
+            <th class="text-center">IP地址</th>
+            <th class="text-center">成本价格</th>
+            <th class="text-center">服务器起租时间</th>
+            <th class="text-center">服务器到期时间</th>
+            <th class="text-center">续费时间</th>
+            <th class="text-center">续费价格</th>
+            <th class="text-center">服务器付费</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% if(serverDocs){ %>
+        <% serverDocs.forEach(function(data){ %>
+        <tr class="text-center">
+            <td>
+                <a href="/server/<%= data.serverId%>"><%= data.serverId %></a>
+            </td>
+            <td>
+                <% if(data.serverMark == true){ %>
+                <span>已启用</span>
+                <% }else{ %>
+                <span>未启用</span>
+                <% } %>
+            </td>
+            <td>
+                <% if(!data.bandwidth){ %>
+                <span>内填写带宽</span>
+                <% }else{ %>
+                <span><%= data.bandwidth %></span>
+                <% } %>
+            </td>
+            <td>
+                <% if(!data.ip){ %>
+                <span>未填写IP地址</span>
+                <% }else{ %>
+                <% data.ip.forEach(function(ipData){ %>
+                <span><%= ipData %></span><br>
+                <% }) %>
+                <% } %>
+            </td>
+            <td>
+                <% if(!data.price){ %>
+                <span>未填写价格</span>
+                <% }else{ %>
+                <span><%= data.price %></span>
+                <% } %>
+            </td>
+            <td>
+                <% if(!data.startTime){ %>
+                <span>未填写启用时间</span>
+                <% }else{ %>
+                <span><%= data.startTime.toLocaleDateString() %></span>
+                <% } %>
+            </td>
+            <td>
+                <% if(!data.endTime){ %>
+                <span>...</span>
+                <% }else{ %>
+                <span><%= data.endTime.toLocaleDateString() %></span>
+                <% } %>
+            </td>
+            <td>
+                <% if(!data.renew.renewTime){ %>
+                <span>无续费时间</span>
+                <% }else{ %>
+                <span><%= data.renew.renewTime.toLocaleDateString() %></span>
+                <% } %>
+            </td>
+            <td>
+                <% if(!data.renew.renewPrice){ %>
+                <span>无续费价格</span>
+                <% }else{ %>
+                <span><%= data.renew.renewPrice %></span>
+                <% } %>
+            </td>
+            <td>
+                <a class="serverPicsBtn" data-toggle="modal" data-target="#updateBox" data-id="<%= data._id%>" href="">
+                    <i class="fa fa-cny"></i>
+                </a>
+            </td>
+        </tr>
+        <% }) %>
+        <% } %>
+        </tbody>
+    </table>
+</form>
+<!--弹出框模态层-->
+<div class="modal fade" id="updateBox" tabindex="-1" role="dialog" aria-labelledby="engineRoom" aria-hidden="true">
+    <div class="modal-dialog">
+        <!--modal 盒子 begin-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    服务器续费
+                </h4>
+            </div>
+            <form class="serverForm" action="/server" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="serverPrice">续费价格：</label>
+                        <input id="serverPrice" class="form-control" type="text" name="serverPrice">
+                    </div>
+                    <div class="form-group">
+                        <label for="endTime">服务器到期时间: </label>
+                        <input id="endTime" class="form-control" type="date" name="endTime">
+                    </div>
+                    <div class="form-group">
+                        <label for="serverPriceInfo">服务器续费备注: </label>
+                        <textarea name="serverPriceInfo" id="serverPriceInfo" class="form-control" cols="30" rows="10"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="submitBtn btn btn-primary">新增服务器记录</button>
+                </div>
+            </form>
+        </div>
+        <!--modal 盒子 end-->
+    </div>
+</div>
+<%- include public/cwfooter.html %>
+<script type="text/javascript">
+    $(function(){
+        //获取需要操作的DOM元素
+        var serverPicsBtn = $('td a.serverPicsBtn'),
+            submitBtn = $('.submitBtn'),
+            serverForm = $('.serverForm');
+        serverPicsBtn.bind('click',function(e){
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            submitBtn.bind('click',function(){
+                var formData = serverForm.serialize(),
+                    data = {
+                        'id':id,
+                        'serverPrice':$('#serverPrice').val(),
+                        'endTime':$('#endTime').val(),
+                        'serverPriceInfo':$('#serverPriceInfo').val()
+                    };
+                //发送ajax
+                $.ajax({
+                    type:'post',
+                    url:'/server/serverPrice',
+                    dataType:'json',
+                    data:data,
+                    success:function(data,status){
+                        if(status == 'success'){
+                            if(data.postStatus === 'success'){
+                                //注册完成
+                                alert(data.msg);
+                                //准备跳转到指定页面
+                                var urls = window.location.host,
+                                        urlPath = window.location.pathname;
+                                return window.location.href = 'http://' + urls + urlPath;
+                            }else{
+                                //返回ajax回调信息
+                                alertMessage.addClass('AjaxBlock');
+                                ajaxContainer.text(data.msg);
+                                ajaxClose.on('click',function(e){
+                                    e.stopPropagation();
+                                    alertMessage.removeClass('AjaxBlock')
+                                });
+                                return false;
+                            }
+                        }
+                    },
+                    error:function(err){
+                        console.log(err)
+                    }
+                });
+            })
+        })
+    });
+</script>

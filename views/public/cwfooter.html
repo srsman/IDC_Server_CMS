@@ -1,0 +1,13 @@
+</div>
+</div>
+</div>
+<div class="btn-group pull-right" style="padding: 0 1%;">
+  <% if(!isFirstPage) { %>
+  <a class="pageBtn btn btn-default" href="?page=<%= page-1 %>">上一页</a>
+  <% } %>
+  <% if(!isLastPage) { %>
+  <a class="pageBtn btn btn-default" href="?&page=<%= page+1 %>">下一页</a>
+  <% } %>
+</div>
+</div>
+<%- include adminFooter.html %>

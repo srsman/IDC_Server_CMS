@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title><%= title %></title>
+  <!--加载依赖文件css-->
+  <link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link href="http://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <!--导航栏 begin-->
+    <nav class="headerNav">
+      <header class="navTitle">
+        <h1>
+          <span>IDC机房资源管理系统</span>
+          <a class="pull-right logout" href="/logout">
+            <i class="fa fa-sign-out"></i>
+            <span class="headerUser"><%= session %></span>
+          </a>
+          <button class="pull-right btn btn-default" type="button" data-toggle="collapse" data-target="#navbarList">
+            <i class="fa fa-bars"></i>
+          </button>
+        </h1>
+      </header>
+      <div id="navbarList" class="collapse">
+        <ul class="nav navbar-nav">
+          <li role="presentation">
+            <a href="/">
+              <i class="fa fa-home"></i>
+              主页
+            </a>
+          </li>
+          <li role="presentation">
+            <a href="/engine">
+              <i class="fa fa-sitemap"></i>
+              机房管理
+            </a>
+          </li>
+          <li role="presentation">
+            <a href="/cabinets">
+              <i class="fa fa-plus"></i>
+              机柜管理
+            </a>
+          </li>
+          <li role="presentation">
+            <a href="/use">
+              <i class="fa fa-send-o"></i>
+              用途管理
+            </a>
+          </li>
+          <li role="presentation">
+            <a href="/ip">
+              <i class="fa fa-circle-o"></i>
+              ip池管理
+            </a>
+          </li>
+          <li role="presentation">
+            <a href="/server">
+              <i class="fa fa-server"></i>
+              服务器管理
+            </a>
+          </li>
+          <li role="presentation">
+            <a href="/createUser">
+              <i class="fa fa-user-plus"></i>
+              用户管理
+            </a>
+          </li>
+          <li role="presentation">
+            <a href="/skillfully">
+              <i class="fa fa-jpy"></i>
+              财务管理
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <!--导航栏 end-->
+    <!--详情内容 begin-->
+    <section class="contentBox">

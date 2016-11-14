@@ -1,0 +1,274 @@
+<%- include public/adminHead.html %>
+<div class="only-p text-right">
+  <button class="btn btn-default" data-toggle="modal" data-target="#cabinets">新增</button>
+</div>
+<div class="tableBox">
+  <table class="table table-bordered table-response table-hover table-primary">
+    <thead>
+    <tr>
+      <th class="text-center">机柜编号</th>
+      <th class="text-center">机柜U数</th>
+      <th class="text-center">机柜电力参数</th>
+      <th class="text-center">机柜机房</th>
+      <th class="text-center">机柜用途</th>
+      <th class="text-center">删除/修改/th>
+    </tr>
+    </thead>
+    <tbody>
+    <% if(docs) { %>
+      <%  docs.forEach(function(data){ %>
+        <tr class="text-center">
+          <td><%= data.cabinetsId %></td>
+          <td><%= data.cabinetsU %></td>
+          <td><%= data.cabinetsPower %></td>
+          <td><%= data.cabinetsRoom[0].engineName %></td>
+          <td>
+			<% if(data.cabinetsUse[0]){ %>
+			<%= data.cabinetsUse[0].useName %>
+			<% } %>
+		  </td>
+          <td>
+		  <a class="deleteBtn" href="cabinets/delete?id=<%= data._id%>"><i class="fa fa-trash-o"></i></a>
+		  <a data-toggle="modal" data-target="#updatreBox" class="updateBtnS" href="" data-id="<%= data._id%>">
+		  <i class="fa fa-edit"></i>
+		  </a>
+		  </td>
+        </tr>
+      <% }) %>
+    <% } %>
+    </tbody>
+  </table>
+</div>
+<!--弹出框模态层-->
+<div class="modal fade" id="cabinets" tabindex="-1" role="dialog" aria-labelledby="cabinets" aria-hidden="true">
+  <div class="modal-dialog">
+    <!--modal 盒子 begin-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title">
+          机柜添加
+        </h4>
+      </div>
+      <form class="engineForm" action="/cabinets" method="post">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="cabinetsId">机柜编号：</label>
+            <input id="cabinetsId" class="form-control" type="text" name="cabinetsId">
+          </div>
+          <div class="form-group">
+            <label for="cabinetsU">机柜U数: </label>
+            <input id="cabinetsU" class="form-control" type="number" name="cabinetsU">
+          </div>
+          <div class="form-group">
+            <label for="cabinetsPower">机柜电力参数：</label>
+            <input id="cabinetsPower" class="form-control" type="text" name="cabinetsPower">
+          </div>
+          <div class="form-group">
+            <label for="cabinetsRoom">机柜所属机房: </label>
+            <select name="cabinetsRoom" id="cabinetsRoom" class="form-group">
+              <% if(engineDocs) { %>
+                <% engineDocs.forEach(function(engineData){ %>
+                  <option class="engineId" value="<%= engineData._id %>"> <%= engineData.engineName %> </option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cabinetsUse">机柜所属用途: </label>
+            <select name="cabinetsUse" id="cabinetsUse" class="form-group">
+              <% if(useDocs) { %>
+                <% useDocs.forEach(function(useData){ %>
+                  <option class="useId" value="<%= useData._id %>"> <%= useData.useName %> </option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" class="submitBtn btn btn-primary">保存机柜</button>
+        </div>
+      </form>
+    </div>
+    <!--modal 盒子 end-->
+  </div>
+</div>
+
+<!--更新机柜用途盒子模型-->
+<div class="modal fade" id="updatreBox" tabindex="-1" role="dialog" aria-labelledby="cabinets" aria-hidden="true">
+  <div class="modal-dialog">
+    <!--modal 盒子 begin-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title">
+          机柜更新
+        </h4>
+      </div>
+      <form class="engineForms" action="/cabinets" method="post">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="cabinetsIds">机柜编号：</label>
+            <input id="cabinetsIds" class="form-control" type="text" name="cabinetsIds">
+          </div>
+          <div class="form-group">
+            <label for="cabinetsUs">机柜U数: </label>
+            <input id="cabinetsUs" class="form-control" type="number" name="cabinetsUs">
+          </div>
+          <div class="form-group">
+            <label for="cabinetsPowers">机柜电力参数：</label>
+            <input id="cabinetsPowers" class="form-control" type="text" name="cabinetsPowers">
+          </div>
+          <div class="form-group">
+            <label for="cabinetsRooms">机柜所属机房: </label>
+            <select name="cabinetsRooms" id="cabinetsRooms" class="form-group">
+              <% if(engineDocs) { %>
+                <% engineDocs.forEach(function(engineData){ %>
+                  <option class="engineId" value="<%= engineData._id %>"> <%= engineData.engineName %> </option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cabinetsUses">机柜所属用途: </label>
+            <select name="cabinetsUses" id="cabinetsUses" class="form-group">
+              <% if(useDocs) { %>
+                <% useDocs.forEach(function(useData){ %>
+                  <option class="useId" value="<%= useData._id %>"> <%= useData.useName %> </option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" class="updateBtnSmall btn btn-primary">更新机柜</button>
+        </div>
+      </form>
+    </div>
+    <!--modal 盒子 end-->
+  </div>
+</div>
+
+<!--ajax回调信息-->
+<div class="ajaxMessage">
+  <h4>提示信息</h4>
+  <p class="ajaxText"></p>
+  <p class="ajaxDissmiss">
+    <button type="button" class="btn btn-info">Close</button>
+  </p>
+  <div class="clearfix"></div>
+</div>
+<%- include public/adminFooter.html %>
+<script type="text/javascript">
+  $(function(){
+    //获取表单提交按钮
+    var submitBtn = $('.submitBtn'),
+      deleteBtn = $('.deleteBtn'),
+	  updateBtnS = $('.updateBtnS');
+    //点击事件准备提交
+    submitBtn.bind('click',function(e){
+      e.stopPropagation();
+      //获取form表单序列化后的值
+      var engineForm = $('.engineForm'),
+        formData = engineForm.serialize(),
+        alertMessage = $('.ajaxMessage'),
+        ajaxContainer = alertMessage.find('.ajaxText'),
+        ajaxClose = alertMessage.find('.ajaxDissmiss .btn');
+      //发送ajax信息
+      $.ajax({
+        url:'cabinets',
+        type:'post',
+        dataType:'json',
+        data:formData,
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus === 'success'){
+              //注册完成
+              alert(data.msg);
+              //准备跳转到指定页面
+              var urls = window.location.host,
+                urlPath = window.location.pathname;
+              return window.location.href = 'http://' + urls + urlPath;
+            }else{
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click',function(e){
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock')
+              });
+              return false;
+            }
+          }
+        },
+        error:function(err){
+          return console.log(err);
+        }
+      });
+    });
+    //------------------删除信息
+    deleteBtn.bind('click',function(e){
+      e.stopPropagation();
+      var thisUrl = $(this).attr('href');
+      if(confirm('您确定要删除此数据吗?')){
+        //确定删除
+        window.location.href = thisUrl;
+      }else{
+        return false;
+      }
+    });
+	updateBtnS.bind('click',function(e){
+		e.preventDefault();
+		var id = $(this).attr('data-id');
+		$('.updateBtnSmall').bind('click',function(e){
+			var data = {
+				'id':id,
+				'cabinetsIds':$('#cabinetsIds').val(),
+				'cabinetsUs':$('#cabinetsUs').val(),
+				'cabinetsPowers':$('#cabinetsPowers').val(),
+				'cabinetsRooms':$('#cabinetsRooms').val(),
+				'cabinetsUses':$('#cabinetsUses').val()
+			};
+			//发送ajax信息
+			  $.ajax({
+				url:'cabinets/update',
+				type:'post',
+				dataType:'json',
+				data:data,
+				success:function(data,status){
+				  if(status == 'success'){
+					if(data.postStatus === 'success'){
+					  //注册完成
+					  alert(data.msg);
+					  //准备跳转到指定页面
+					  var urls = window.location.host,
+						urlPath = window.location.pathname;
+					  return window.location.href = 'http://' + urls + urlPath;
+					}else{
+					  //返回ajax回调信息
+					  alertMessage.addClass('AjaxBlock');
+					  ajaxContainer.text(data.msg);
+					  ajaxClose.on('click',function(e){
+						e.stopPropagation();
+						alertMessage.removeClass('AjaxBlock')
+					  });
+					  return false;
+					}
+				  }
+				},
+				error:function(err){
+				  return console.log(err);
+				}
+			  });
+		})
+	});
+  });
+</script>

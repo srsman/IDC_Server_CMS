@@ -1,0 +1,1016 @@
+<%- include public/adminHead.html %>
+<div class="only-p text-right">
+  <div class="row">
+    <button class="btn pull-right btn-default" data-toggle="modal" data-target="#serverModal">添加服务器</button>
+    <div class="col-lg-6 col-md-6 col-sm-6 com-xs-6 pull-right">
+      <div class="input-group">
+        <div class="input-group-btn">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">切换搜索 <span class="caret"></span></button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a class="searchIps" href="#">搜IP</a></li>
+            <li><a class="searchIds" href="#">搜编号</a></li>
+            <li><a class="searchCab" href="#">搜机柜</a></li>
+          </ul>
+        </div><!-- /btn-group -->
+        <input type="text" name="searchStr" class="form-control">
+      </div>
+    </div>
+  </div>
+  <p class="ps">PS:需要使用以多个IP地址搜索时，请在每个IP地址后面加上<b class="text-danger">","</b>如<b class="text-danger">127.0.0.1,127.0.0.1,........ 单个IP地址无需添加</b></p>
+</div>
+<div class="tableBox">
+  <table class="table table-bordered table-response table-hover table-primary tabList">
+    <thead>
+      <tr>
+        <th class="text-center text-success">编号</th>
+        <th class="text-center text-primary">状态</th>
+        <th class="text-center">内存</th>
+        <th class="text-center">带宽</th>
+        <th class="text-center">ip地址</th>
+        <th class="text-center">成本价格</th>
+        <th class="text-center">服务器起租时间</th>
+        <th class="text-center">服务器到期时间</th>
+        <th class="text-center">续费时间</th>
+        <th class="text-center">续费价格</th>
+        <th class="text-center">管理</th>
+        <th class="text-center">修改/删除</th>
+      </tr>
+    </thead>
+    <tbody class="searchB">
+    <% if(serverData){ %>
+    <% serverData.forEach(function(data){ %>
+      <tr class="text-center">
+        <td>
+          <a href="/server/<%= data.serverId %>"><%= data.serverId %></a>
+        </td>
+        <td>
+          <% if(data.serverMark == false){ %>
+          <span class="text-success">未启用</span>
+          <% }else{ %>
+          <span style="color:red;">已启用</span>
+          <% } %>
+        </td>
+        <td>
+          <% if(data.memories == false){ %>
+          未填写内存
+          <% }else{ %>
+          <%= data.memories %>
+          <% } %>
+        </td>
+        <td>
+          <% if(data.bandwidth == false){ %>
+          未填写带宽
+          <% }else{ %>
+          <%= data.bandwidth %>
+          <% } %>
+        </td>
+        <td>
+          <% if(data.ip.length <= 0){ %>
+          未填写IP
+          <% }else{ %>
+          <% data.ip.forEach(function(ip){ %>
+            <span><%= ip %></span><br />
+          <% }) %>
+          <% } %>
+        </td>
+        <td>
+          <% if(!data.price){ %>
+          未填写价格
+          <% }else{ %>
+          <%= data.price %>
+          <% } %>
+        </td>
+        <td>
+          <% if(!data.startTime){ %>
+          未填写起租时间
+          <% }else{ %>
+          <%= data.startTime.toLocaleDateString() %>
+          <% } %>
+        </td>
+        <td>
+          <% if(!data.endTime){ %>
+          未填写到期时间
+          <% }else{ %>
+          <%= data.endTime.toLocaleDateString() %>
+          <% } %>
+        </td>
+        <td>
+          <% if(!data.renew.renewTime){ %>
+          续费时间空
+          <% }else{ %>
+          <%= data.renew.renewTime.toLocaleDateString() %>
+          <% } %>
+        </td>
+        <td>
+          <% if(!data.renew.renewPrice){ %>
+          续费价格空
+          <% }else{ %>
+          <%= data.renew.renewPrice %>
+          <% } %>
+        </td>
+        <td>
+          <a href="<%= data.serverAdmin.serverUrl %>">管理</a>
+        </td>
+        <td>
+          <a class="updateBtn" data-toggle="modal" data-target="#updateBox" data-id="<%= data._id %>" href="">
+            <i class="fa fa-edit"></i>
+          </a>
+          <a class="deleteBtn" href="/servers/delete?id=<%=data._id %>">
+            <i class="fa fa-trash-o"></i>
+          </a>
+        </td>
+      </tr>
+    <% }) %>
+    <% } %>
+    </tbody>
+  </table>
+</div>
+<!--添加服务器 模态框 begin -->
+<div class="modal fade bs-example-modal-lg" id="serverModal" tabindex="-1" role="dialog" aria-labelledby="createServer" aria-hidden="true">
+  <div class="modal-dialog">
+    <!--modal整体内容部分-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title" id="createServer">新增服务器</h4>
+      </div>
+      <div class="modal-body">
+        <!--form表单开始-->
+        <form class="modalData" method="post" role="form">
+          <div class="form-group">
+            <label for="serverId">服务器编号: </label>
+            <input id="serverId" class="form-control" type="text" name="serverId">
+          </div>
+          <div class="form-group">
+            <label for="price">服务器价格: </label>
+            <input id="price" class="form-control" type="number" name="price">
+          </div>
+          <div class="form-group">
+            <label for="serverCpu">CPU型号：</label>
+            <input id="serverCpu" class="form-control" name="serverCpu" type="text">
+          </div>
+          <div class="form-group">
+            <label for="board">主板类型: </label>
+            <input id="board" class="form-control" name="board" type="text">
+          </div>
+          <div class="form-group">
+            <label for="memories">内存大小: </label>
+            <input id="memories" class="form-control" name="memories" type="text">
+          </div>
+          <div class="form-group">
+            <label for="yd">硬盘大小: </label>
+            <input id="yd" class="form-control" name="yd" type="text">
+          </div>
+          <div class="form-group">
+            <label for="nic">服务器网卡：</label>
+            <input id="nic" class="form-control" name="nic" type="text">
+          </div>
+          <div class="form-group">
+            <label for="bandwidth">服务器带宽: </label>
+            <input id="bandwidth" class="form-control" name="bandwidth" type="text">
+          </div>
+          <div class="form-group">
+            <label for="serverRoom">服务器所属机房: </label>
+            <select name="serverRoom" id="serverRoom" class="form-control">
+              <option value="">请选择</option>
+              <% if(engineDocs){ %>
+              <% engineDocs.forEach(function(EngineData){ %>
+                <option value="<%= EngineData._id %>"><%= EngineData.engineName %></option>
+              <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="serverCab">服务器所属机柜: </label>
+            <select name="serverCab" id="serverCab" class="form-control">
+              <% if(cabDocs){ %>
+              <% cabDocs.forEach(function(datas){ %>
+              <option value="<%= datas._id %>"><%= datas.cabinetsId %></option>
+              <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <!--<div class="form-group serverIpAddress">
+            <label for="serverIpAddress">服务器IP段选择: </label>
+            <select name="serverIpAddress" id="serverIpAddress" class="form-control">
+            </select>
+          </div>-->
+          <div class="form-group serverUse">
+            <label for="serverUse">服务器用途: </label>
+            <select name="serverUse" id="serverUse" class="form-control">
+              <% if(useDocs){ %>
+              <% useDocs.forEach(function(useData){ %>
+              <option value="<%= useData._id %>"><%= useData.useName %></option>
+              <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group serverIP">
+            <label for="serverIP">服务器IP地址选择: </label>
+            <select name="serverIP" id="serverIP" multiple size="5" class="form-control">
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="shelvesTime">服务器上架时间: </label>
+            <input id="shelvesTime" class="form-control" name="shelvesTime" type="date">
+          </div>
+          <div  class="form-group">
+            <label for="serverUrl">服务器管理地址: </label>
+            <input id="serverUrl" class="form-control" name="serverUrl" type="text">
+          </div>
+          <div class="form-group">
+            <label for="serverUser">服务器管理账号: </label>
+            <input id="serverUser" class="form-control" name="serverUser" type="text">
+          </div>
+          <div class="form-group">
+            <label for="serverPass">服务器管理密码: </label>
+            <input id="serverPass" class="form-control" name="serverPass" type="text">
+          </div>
+          <div class="form-group">
+            <label for="serverInfo">服务器备注: </label>
+            <textarea class="form-control" name="serverInfo" id="serverInfo" cols="30" rows="10"></textarea>
+          </div>
+        </form>
+        <!--form表单结束-->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" type="button" data-dismiss="modal">关闭</button>
+        <button class="createBtn btn btn-info" type="button">保存服务器</button>
+      </div>
+    </div>
+    <!--modal整体内容结束-->
+  </div>
+</div>
+<!--添加服务器完毕 end -->
+<!--更新服务器开始-->
+<div id="updateBox" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="updateTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!--更新模态框开始-->
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h4 id="updateTitle" class="modal-title">
+          服务器信息更新
+        </h4>
+      </div>
+      <div class="modal-body">
+        <!--form表单开始-->
+        <form class="updateData" method="post" role="form">
+          <div class="form-group">
+            <label for="updateCab">服务器所属机柜: </label>
+            <select name="updateCab" id="updateCab" class="form-control">
+              <% if(cabDocs){ %>
+              <% cabDocs.forEach(function(datas){ %>
+              <option value="<%= datas._id %>"><%= datas.cabinetsId %></option>
+              <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="updateCpu">CPU型号：</label>
+            <input id="updateCpu" class="form-control" name="updateCpu" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateBoard">主板类型: </label>
+            <input id="updateBoard" class="form-control" name="updateBoard" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateMemories">内存大小: </label>
+            <input id="updateMemories" class="form-control" name="updateMemories" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateYd">硬盘大小: </label>
+            <input id="updateYd" class="form-control" name="updateYd" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateNic">服务器网卡：</label>
+            <input id="updateNic" class="form-control" name="updateNic" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateBandwidth">服务器带宽: </label>
+            <input id="updateBandwidth" class="form-control" name="updateBandwidth" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateMark">是否更新IP地址:</label>
+            <select name="updateMark" id="updateMark" class="form-control">
+              <option value="0">请选择</option>
+              <option value="1">不更新IP,只更新内容</option>
+              <option value="2">更新当前IP地址</option>
+              <option value="3">更换IP段地址</option>
+              <option value="4">清除所有IP</option>
+            </select>
+          </div>
+          <div class="form-group updateRoom">
+            <label for="updateRoom">服务器所属机房: </label>
+            <select name="updateRoom" id="updateRoom" class="form-control">
+              <option value="">请选择</option>
+              <% if(engineDocs){ %>
+              <% engineDocs.forEach(function(EngineData){ %>
+              <option value="<%= EngineData._id %>"><%= EngineData.engineName %></option>
+              <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group thisIp">
+            <label for="thisIp">更新当前IP段: </label>
+            <select name="thisIp" id="thisIp" class="form-control" multiple="true" size="5">
+
+            </select>
+          </div>
+          <div class="form-group serverIpAddress">
+            <label for="updateIpAddress">服务器IP段选择: </label>
+            <select name="updateIpAddress" id="updateIpAddress" class="form-control">
+            </select>
+          </div>
+          <div class="form-group serverUse">
+            <label for="updateUse">服务器用途: </label>
+            <select name="updateUse" id="updateUse" class="form-control">
+              <% if(useDocs){ %>
+              <% useDocs.forEach(function(useData){ %>
+              <option value="<%= useData._id %>"><%= useData.useName %></option>
+              <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group serverIP">
+            <label for="updateIP">服务器IP地址选择: </label>
+            <select name="updateIP" id="updateIP" multiple size="5" class="form-control">
+            </select>
+          </div>
+          <div  class="form-group">
+            <label for="updateUrl">服务器管理地址: </label>
+            <input id="updateUrl" class="form-control" name="updateUrl" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateUser">服务器管理账号: </label>
+            <input id="updateUser" class="form-control" name="updateUser" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updatePass">服务器管理密码: </label>
+            <input id="updatePass" class="form-control" name="updatePass" type="text">
+          </div>
+          <div class="form-group">
+            <label for="updateInfo">服务器备注: </label>
+            <textarea class="form-control" name="updateInfo" id="updateInfo" cols="30" rows="10"></textarea>
+          </div>
+          <input type="hidden" name="myId" id="myId">
+          <input type="hidden" name="cId" id="cId">
+          <div class="form-group" id="thisId"></div>
+          <div class="form-group">
+            <label for="hostInfo">服务器维护备注: </label>
+            <textarea class="form-control" name="hostInfo" id="hostInfo" cols="30" rows="10"></textarea>
+          </div>
+        </form>
+        <!--form表单结束-->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" type="button" data-dismiss="modal">关闭</button>
+        <button class=" myUpdateBtn btn btn-info" type="button">更新服务器</button>
+      </div>
+      <!--更新模态框结束-->
+    </div>
+  </div>
+</div>
+<!--更新服务器结束-->
+
+<div class="tableBox ajaxCallback">
+  <table class="table table-bordered table-response table-hover table-primary">
+    <thead>
+    <tr>
+      <th class="text-center text-success">编号</th>
+      <th class="text-center text-primary">状态</th>
+      <th class="text-center">内存</th>
+      <th class="text-center">带宽</th>
+      <th class="text-center">ip地址</th>
+      <th class="text-center">成本价格</th>
+      <th class="text-center">服务器起租时间</th>
+      <th class="text-center">服务器到期时间</th>
+      <th class="text-center">续费时间</th>
+      <th class="text-center">续费价格</th>
+      <th class="text-center">管理</th>
+    </tr>
+    </thead>
+    <tbody id="noS">
+      <tr class="searchB">
+        <td class="text-center td1"></td>
+        <td class="text-center td2"></td>
+        <td class="text-center td3"></td>
+        <td class="text-center td4"></td>
+        <td class="text-center td5"></td>
+        <td class="text-center td6"></td>
+        <td class="text-center td7"></td>
+        <td class="text-center td8"></td>
+        <td class="text-center td9"></td>
+        <td class="text-center td10"></td>
+        <td class="text-center td11"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!--第二块表格-->
+<div class="btn-group pull-right" style="padding: 0 1%;">
+  <% if(!isFirstPage) { %>
+  <a class="pageBtn btn btn-default" href="?page=<%= page-1 %>">上一页</a>
+  <% } %>
+  <% if(!isLastPage) { %>
+  <a class="pageBtn btn btn-default" href="?&page=<%= page+1 %>">下一页</a>
+  <% } %>
+</div>
+<!--ajax回调信息-->
+<div class="ajaxMessage">
+  <h4>提示信息</h4>
+  <p class="ajaxText"></p>
+  <p class="ajaxDissmiss">
+    <button type="button" class="btn btn-info">Close</button>
+  </p>
+  <div class="clearfix"></div>
+</div>
+<%- include public/adminFooter.html %>
+<script type="text/javascript">
+  $(function(){
+    //获取表单序列化后的数据
+    var modalData = $('.modalData'),
+        updateData = $('.updateData'),
+        updateBtn = $('.updateBtn'),
+        newUpdate = $('.myUpdateBtn'),
+        createBtn = $('.createBtn'),
+        deleteBtn = $('.deleteBtn'),
+        alertMessage = $('.ajaxMessage'),
+        ajaxContainer = alertMessage.find('.ajaxText'),
+        ajaxClose = alertMessage.find('.ajaxDissmiss .btn');
+    //表单提交插入新数据
+    createBtn.bind('click',function(e){
+      e.stopPropagation();
+      var formData = modalData.serialize();
+//      console.log(formData);
+      //发送ajax数据
+      $.ajax({
+        type:'post',
+        url:'server',
+        dataType:'json',
+        data:formData,
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus === 'success'){
+              //注册完成
+              alert(data.msg);
+              //准备跳转到指定页面
+              var urls = window.location.host,
+                urlPath = window.location.pathname;
+              return window.location.href = 'http://' + urls + urlPath;
+            }else{
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click',function(e){
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock')
+              });
+              return false;
+            }
+          }
+        },
+        error:function(err){
+          console.log(err)
+        }
+      });
+    });
+    //表单一级联动查询
+    $('#serverModal #serverRoom').bind('change',function(){
+      var thisVal = $(this).val();
+      if(thisVal == ''){
+        $('#serverModal .serverUse').removeClass('trueBlock');
+//      $('#serverModal .serverIpAddress').removeClass('trueBlock');
+        $('#serverModal .serverIP').removeClass('trueBlock');
+      }else {
+        $('#serverModal .serverUse').addClass('trueBlock');
+      }
+      $.ajax({
+        type:'get',
+        url:'/select?id=' + thisVal,
+        dataType:'json',
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus == 'success'){
+              var _html = null;
+              if(data.msg.length == 0){
+                $('#serverModal #serverIpAddress').html('<option>无IP段可选择</option>');
+              }else{
+                data.msg.forEach(function(data){
+                  var temp = '<option value="'+ data._id +'">'+ data.ipStart + '~' + data.ipEnd +'</option>';
+                  _html += temp;
+                });
+                $('#serverModal #serverIpAddress').html(_html);
+              }
+            }else{
+              return false;
+            }
+          }else{
+            return false;
+          };
+        },
+        error:function(err){
+          console.log(err);
+        }
+      });
+    });
+    //表单二级查询
+//  $('#serverModal #serverIpAddress').bind('change',function(){
+//    var thisVal = $(this).val();
+//    if(thisVal !== ''){
+//      $('#serverModal .serverUse').addClass('trueBlock');
+//    }else {
+//      $('#serverModal .serverUse').removeClass('trueBlock');
+//      $('#serverModal .serverIP').removeClass('trueBlock');
+//    }
+//  });
+    //表单三级查询
+    $('#serverModal #serverUse').bind('change',function(){
+//    var ips = $('#serverModal #serverIpAddress').val();
+      var thisVal = $(this).val();
+      if(thisVal !== ''){
+        $('#serverModal .serverIP').addClass('trueBlock');
+      }else {
+        $('#serverModal .serverIP').removeClass('trueBlock');
+      }
+      $.ajax({
+        type:'get',
+        url:'/selectIp?use=' + thisVal,
+        dataType:'json',
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus == 'success'){
+              var _html = null;
+              if(data.msg.length == 0){
+                $('#serverModal #serverIP').html('<option>此用途无IP地址可用</option>');
+              }else{
+                data.msg.forEach(function(data){
+                  var temp = '<option value="'+ data.ip +'">'+ data.ip +'</option>';
+                  _html += temp;
+                });
+                $('#serverModal #serverIP').html(_html);
+              }
+            }else{
+              return false;
+            }
+          }else{
+            return false;
+          };
+        },
+        error:function(err){
+          console.log(err);
+        }
+      })
+    });
+    //------------------删除信息
+    deleteBtn.bind('click',function(e){
+      e.stopPropagation();
+      var thisUrl = $(this).attr('href');
+      if(confirm('您确定要删除此数据吗?')){
+        //确定删除
+        window.location.href = thisUrl;
+      }else{
+        return false;
+      }
+    });
+
+    //----------------------------------------------------更新update表单联动-------------------------------------
+    //表单一级联动查询
+    $('#updateBox #updateRoom').bind('change',function(){
+      var thisVal = $(this).val();
+      if(thisVal == ''){
+        $('#updateBox .serverUse').removeClass('trueBlock');
+        $('#updateBox .serverIpAddress').removeClass('trueBlock');
+        $('#updateBox .serverIP').removeClass('trueBlock');
+      }else {
+        $('#updateBox .serverIpAddress').addClass('trueBlock');
+      }
+      $.ajax({
+        type:'get',
+        url:'/select?id=' + thisVal,
+        dataType:'json',
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus == 'success'){
+              var _html = null;
+              if(data.msg.length == 0){
+                $('#updateBox #updateIpAddress').html('<option>无IP段可选择</option>');
+              }else{
+                data.msg.forEach(function(data){
+                  var temp = '<option value="'+ data._id +'">'+ data.ipStart + '~' + data.ipEnd +'</option>';
+                  _html += temp;
+                });
+                $('#updateBox #updateIpAddress').html(_html);
+              }
+            }else{
+              return false;
+            }
+          }else{
+            return false;
+          };
+        },
+        error:function(err){
+          console.log(err);
+        }
+      });
+    });
+    //表单二级查询
+    $('#updateBox #updateIpAddress').bind('change',function(){
+      var thisVal = $(this).val();
+      if(thisVal !== ''){
+        $('#updateBox .serverUse').addClass('trueBlock');
+      }else {
+        $('#updateBox .serverUse').removeClass('trueBlock');
+        $('#updateBox .serverIP').removeClass('trueBlock');
+      }
+    });
+    //表单三级查询
+    $('#updateBox #updateUse').bind('change',function(){
+      var ips = $('#updateBox #updateIpAddress').val();
+      var thisVal = $(this).val();
+      if(thisVal !== ''){
+        $('#updateBox .serverIP').addClass('trueBlock');
+      }else {
+        $('#updateBox .serverIP').removeClass('trueBlock');
+      }
+      $.ajax({
+        type:'get',
+        url:'/selectIp?big_id=' + ips + '&use=' + thisVal,
+        dataType:'json',
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus == 'success'){
+              var _html = null;
+              if(data.msg.length == 0){
+                $('#updateBox #updateIP').html('<option>此用途无IP地址可用</option>');
+              }else{
+                data.msg.forEach(function(data){
+                  var temp = '<option value="'+ data.ip +'">'+ data.ip +'</option>';
+                  _html += temp;
+                });
+                $('#updateBox #updateIP').html(_html);
+              }
+            }else{
+              return false;
+            }
+          }else{
+            return false;
+          };
+        },
+        error:function(err){
+          console.log(err);
+        }
+      })
+    });
+
+    //-------------------------切换更新状态
+    $('.updateRoom').addClass('noBlock');
+    $('.thisIp').addClass('noBlock');
+    $('#updateMark').bind('change',function(){
+      var isMark = parseInt($(this).val());
+      //switch 判断
+      switch(isMark){
+        case 1:
+              //不更新隐藏
+              $('.updateRoom').addClass('noBlock');
+              $('.updateIpAddress').addClass('noBlock');
+              $('.updateUse').addClass('noBlock');
+              $('.updateIP').addClass('noBlock');
+              $('.thisIp').addClass('noBlock');
+              $('.myUpdateBtn').removeClass('disabled');
+              break;
+        case 2:
+              //更新当前ip段
+              $('.updateRoom').addClass('noBlock');
+              $('.myUpdateBtn').removeClass('disabled');
+              $('.thisIp').removeClass('noBlock');
+              $('.updateIpAddress').addClass('noBlock');
+              $('.updateUse').addClass('noBlock');
+              $('.updateIP').addClass('noBlock');
+              break;
+        case 3:
+              //更新ip段
+              $('.thisIp').addClass('noBlock');
+              $('.myUpdateBtn').removeClass('disabled');
+              $('.updateRoom').removeClass('noBlock');
+              $('.updateIpAddress').removeClass('noBlock');
+              $('.updateUse').removeClass('noBlock');
+              $('.updateIP').removeClass('noBlock');
+              break;
+        case 4:
+              //清除所有IP
+              $('.updateRoom').addClass('noBlock');
+              $('.thisIp').addClass('noBlock');
+              $('.updateIpAddress').addClass('noBlock');
+              $('.updateUse').addClass('noBlock');
+              $('.updateIP').addClass('noBlock');
+              $('.myUpdateBtn').removeClass('disabled');
+              break;
+        default:
+          $('.updateRoom').addClass('noBlock');
+          $('.updateIpAddress').addClass('noBlock');
+          $('.updateUse').addClass('noBlock');
+          $('.updateIP').addClass('noBlock');
+          $('.thisIp').addClass('noBlock');
+          $('.myUpdateBtn').addClass('disabled');
+      };
+    });
+    //---------------------表单更新
+    updateBtn.bind('click',function(e){
+      e.preventDefault();
+      //获取id
+      var id = $(this).attr('data-id');
+      //发送post数据准备更新表单
+      $.ajax({
+        url:'/server/getUpdate',
+        type:'post',
+        dataType:'json',
+        data:{
+          'id':id
+        },
+        success:function(data,status) {
+          if (status == 'success') {
+            if (data.postStatus === 'success') {
+              //准备更新页面
+              var updateInfo = data.msg;
+              $('#updateBox #updateCpu').val(updateInfo.cpu);
+              $('#updateBox #updateBoard').val(updateInfo.board);
+              $('#updateBox #updateMemories').val(updateInfo.memories);
+              $('#updateBox #updateYd').val(updateInfo.yd);
+              $('#updateBox #updateNic').val(updateInfo.nic);
+              $('#updateBox #updateBandwidth').val(updateInfo.bandwidth);
+              $('#updateBox #updateUrl').val(updateInfo.serverAdmin.serverUrl);
+              $('#updateBox #updateUser').val(updateInfo.serverAdmin.serverUser);
+              $('#updateBox #updatePass').val(updateInfo.serverAdmin.serverPass);
+              $('#updateBox #updateInfo').val(updateInfo.serverInfo);
+              $('#updateBox #myId').val(updateInfo._id);
+              $('#updateBox #thisId').html('<input type="hidden" name="uid" value="'+ updateInfo.ip  +'">');
+              var dataIps = updateInfo.ip;
+              var _html = '';
+              dataIps.forEach(function(ip){
+                var temp = '<option value="'+ ip+'">'+ ip +'</option>';
+                _html += temp;
+              });
+              $('#updateBox #thisIp').html(_html);
+              $('#updateBox #cId').val(updateInfo.serverId);
+            } else {
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click', function (e) {
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock')
+              });
+              return false;
+            }
+          }
+        },
+        error:function(err){
+          console.log(err);
+        }
+      });
+    });
+    //-------------------------更新表单开始
+    newUpdate.bind('click',function(e){
+      e.stopPropagation();
+      var formData = $('#updateBox .updateData').serialize();
+      //发送ajax
+      $.ajax({
+        url:'/server/updateForm',
+        type:'post',
+        dataType:'json',
+        data:formData,
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus === 'success'){
+              //注册完成
+              alert(data.msg);
+              //准备跳转到指定页面
+              var urls = window.location.host,
+                urlPath = window.location.pathname;
+              return window.location.href = 'http://' + urls + urlPath;
+            }else{
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click',function(e){
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock')
+              });
+              return false;
+            }
+          }
+        },
+        error:function(err){
+          console.log(err);
+        }
+      });
+    });
+
+    //----------------------------搜索查询
+    var searchIps = $('.searchIps'),
+        searchIds = $('.searchIds'),
+        searchCab = $('.searchCab');
+    //查询编号
+    searchIds.bind('click',function(e){
+      e.preventDefault();
+      sendAjax('server/searchId');
+    });
+    searchIps.bind('click',function(e){
+      e.preventDefault();
+      sendAjax('server/searchIp');
+    });
+    searchCab.bind('click',function(e){
+      e.preventDefault();
+      var searchStr = $('input[name="searchStr"]').val();
+      //发送ajax数据
+      $.ajax({
+        type:'post',
+        url:'server/cab',
+        dataType:'json',
+        data:{
+          'id':searchStr
+        },
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus === 'success'){
+              if(data.msg == null){
+                alert('查询失败此服务器不存在')
+              }else{
+                //更新页面
+                $('.tabList').css({'display':'none'});
+                $('.ajaxCallback').css({'display':'block'});
+                var _tr = '';
+//                $('#noS').html();
+                if(data.msg.length < 0){
+                  alert('此机柜未关联服务器')
+                }else{
+                  data.msg.forEach(function(data){
+                    var spans = '',
+                        gf = '',
+                        urls = '',
+                        price = "",
+                        time = '',
+                        endTimes = '',
+                        serverMarks = '';
+                    if(data.renew){
+                      spans += data.renew.renewTime;
+                    }else{
+                      spans = '未填写'
+                    }
+                    if(data.renew){
+                      gf += data.renew.renewPrice;
+                    }else{
+                      gf = '未填写'
+                    }
+                    if(data.serverAdmin){
+                      urls += data.serverAdmin.serverUrl;
+                    }else{
+                      urls = '未填写'
+                    }
+                    if(data.price){
+                      price += data.price;
+                    }else{
+                      price = '未填写'
+                    }
+                    if(data.startTime !== undefined){
+                      time += data.startTime;
+                    }else{
+                      time = '未填写时间'
+                    }
+                    if(data.endTime !== undefined){
+                      endTimes += data.endTime;
+                    }else{
+                      endTimes = '未填写时间'
+                    }
+                    if(data.serverMark == true){
+                      serverMarks = '<span style="color:red;">启用</span>'
+                    }else{
+                      serverMarks = '<span class="text-success">未用</span>'
+                    }
+                    var temp = '<tr class="text-center">' +
+                      '<td><a href="/server/'+data.serverId+'">'+data.serverId+'</a></td>' +
+                      '<td>'+ serverMarks +'</td>' +
+                      '<td>'+ data.memories +'</td>' +
+                      '<td>'+ data.bandwidth +'</td>' +
+                      '<td>'+ data.ip +'</td>' +
+                      '<td>'+ price +'</td>' +
+                      '<td>'+ time +'</td>' +
+                      '<td>'+ endTimes +'</td>' +
+                      '<td>'+ spans +'</td>' +
+                      '<td>'+ gf +'</td>' +
+                      '<td><a href="'+ urls +'">管理</a></td>' +
+                      '</tr>';
+                    _tr += temp;
+                  });
+                  $('#noS').html(_tr);
+                }
+              }
+            }else{
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click',function(e){
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock');
+              });
+              return false;
+            }
+          }
+        },
+        error:function(err){
+          console.log(err)
+        }
+      });
+    });
+    function sendAjax(url){
+      var searchStr = $('input[name="searchStr"]').val();
+      //发送ajax数据
+      $.ajax({
+        type:'post',
+        url:url,
+        dataType:'json',
+        data:{
+          'id':searchStr
+        },
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus === 'success'){
+              if(data.msg == null){
+                alert('查询失败此服务器不存在')
+              }else{
+                //更新页面
+                $('.tabList').css({'display':'none'});
+                $('.ajaxCallback').css({'display':'block'});
+                $('.searchB .td1').html('<a href="/server/'+ data.msg.serverId +'">'+data.msg.serverId+'</a>');
+                if(data.msg.serverMark == true){
+                  $('.searchB .td2').html('已启用');
+                }else{
+                  $('.searchB .td2').html('未启用');
+                }
+                $('.searchB .td3').html(data.msg.memories);
+                $('.searchB .td4').html(data.msg.bandwidth);
+                var ip = '';
+                for(var i in data.msg.ip){
+                  var temp = '<span>'+ data.msg.ip[i] +'</span><br />';
+                  ip += temp;
+                }
+
+                $('.searchB .td5').html(ip);
+                if(data.msg.price == null){
+                  $('.searchB .td6').html('未填写价格');
+                }else{
+                  $('.searchB .td6').html(data.msg.price);
+                }
+                if(!data.msg.startTime){
+                  $('.searchB .td7').html('未填写起租时间');
+                }else{
+                  $('.searchB .td7').html(data.msg.startTime);
+                }
+                if(!data.msg.endTime){
+                  $('.searchB .td8').html('未填写到期时间');
+                }else{
+                  $('.searchB .td8').html(data.msg.endTime);
+                }
+                if(!data.msg.renew){
+                  $('.searchB .td9').html('未填写续费时间');
+                }else{
+                  $('.searchB .td9').html(data.msg.renew.renewTime);
+                }
+                if(!data.msg.renew){
+                  $('.searchB .td10').html('未填写续费价格');
+                }else{
+                  $('.searchB .td10').html(data.msg.renew.renewPrice);
+                }
+                if(data.msg.serverAdmin) {
+                  $('.searchB .td11').html('<a href="' + data.msg.serverAdmin.serverUrl + '">管理</a>');
+                }else{
+                  $('.searchB .td11').html('未填写管理地址');
+                }
+              }
+            }else{
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click',function(e){
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock');
+              });
+              return false;
+            }
+          }
+        },
+        error:function(err){
+          console.log(err)
+        }
+      });
+    };
+  });
+</script>
