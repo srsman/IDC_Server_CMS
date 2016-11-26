@@ -1,0 +1,143 @@
+<%- include public/cwHead.html %>
+          <form class="serverDown" action="/serverDown" method="post">
+            <table class="table table-bordered table-hover table-primary table-response">
+              <thead>
+                <tr>
+                  <th class="text-center">编号</th>
+                  <th class="text-center">状态</th>
+                  <th class="text-center">带宽</th>
+                  <th class="text-center">IP地址</th>
+                  <th class="text-center">成本价格</th>
+                  <th class="text-center">服务器起租时间</th>
+                  <th class="text-center">服务器到期时间</th>
+                  <th class="text-center">续费时间</th>
+                  <th class="text-center">续费价格</th>
+                  <th class="text-center">下架服务器</th>
+                </tr>
+              </thead>
+              <tbody>
+              <% if(serverDocs){ %>
+              <% serverDocs.forEach(function(data){ %>
+                <tr class="text-center">
+                  <td>
+                    <a href="/server/<%= data.serverId%>"><%= data.serverId %></a>
+                  </td>
+                  <td>
+                    <% if(data.serverMark == true){ %>
+                    <span>已启用</span>
+                    <% }else{ %>
+                    <span>未启用</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(!data.bandwidth){ %>
+                    <span>内填写带宽</span>
+                    <% }else{ %>
+                    <span><%= data.bandwidth %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(!data.ip){ %>
+                    <span>未填写IP地址</span>
+                    <% }else{ %>
+                    <% data.ip.forEach(function(ipData){ %>
+                    <span><%= ipData %></span><br>
+                    <% }) %>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(!data.price){ %>
+                    <span>未填写价格</span>
+                    <% }else{ %>
+                    <span><%= data.price %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(!data.startTime){ %>
+                    <span>未填写启用时间</span>
+                    <% }else{ %>
+                    <span><%= data.startTime.toLocaleDateString() %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(!data.endTime){ %>
+                    <span>...</span>
+                    <% }else{ %>
+                    <span><%= data.endTime.toLocaleDateString() %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(!data.renew.renewTime){ %>
+                    <span>无续费时间</span>
+                    <% }else{ %>
+                    <span><%= data.renew.renewTime.toLocaleDateString() %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(!data.renew.renewPrice){ %>
+                    <span>无续费信息</span>
+                    <% }else{ %>
+                    <span><%= data.renew.renewPrice %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <a class="serverDown" href="" data-id="<%= data._id%>">
+                      <i class="fa fa-hand-o-down"></i>
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+              <% } %>
+              </tbody>
+            </table>
+          </form>
+<%- include public/cwfooter.html %>
+<script type="text/javascript">
+  $(function(){
+    //获取需要操作的DOM元素
+    var serverDown = $('td a.serverDown');
+    serverDown.bind('click',function(e){
+      e.stopPropagation();
+      var r = confirm('确定下架服务器吗?');
+      if(r == true) {
+        //获取id信息
+        var id = $(this).attr('data-id');
+        //发送ajax信息
+        $.ajax({
+          type: 'post',
+          url: '/server/serverDowns',
+          dataType: 'json',
+          data: {
+            'id': id
+          },
+          success: function (data, status) {
+            if (status == 'success') {
+              if (data.postStatus === 'success') {
+                //注册完成
+                alert(data.msg);
+                //准备跳转到指定页面
+                var urls = window.location.host,
+                  urlPath = window.location.pathname;
+                return window.location.href = 'http://' + urls + urlPath;
+              } else {
+                //返回ajax回调信息
+                alertMessage.addClass('AjaxBlock');
+                ajaxContainer.text(data.msg);
+                ajaxClose.on('click', function (e) {
+                  e.stopPropagation();
+                  alertMessage.removeClass('AjaxBlock')
+                });
+                return false;
+              }
+            }
+          },
+          error: function (err) {
+            console.log(err)
+          }
+        });
+      }else{
+        return false;
+      }
+    });
+  });
+</script>

@@ -1,0 +1,59 @@
+<%- include public/cwHead.html %>
+
+<form class="serverDown" action="/serverDown" method="post">
+    <table class="table table-bordered table-hover table-primary table-response">
+        <thead>
+        <tr>
+            <th class="text-center">编号</th>
+            <th class="text-center">续费人</th>
+            <th class="text-center">原服务器用户</th>
+            <th class="text-center">服务器续费时间</th>
+            <th class="text-center">服务器到期时间</th>
+            <th class="text-center">续费价格</th>
+            <th class="text-center">续费历史备注</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% if(serverDocs){ %>
+        <% serverDocs.forEach(function(data){ %>
+            <tr class="text-center">
+                <td>
+                    <a href="/server/<%= data.serverId.serverId %>"><%= data.serverId.serverId %></a>
+                </td>
+                <td><%= data.username %></td>
+                <td><%= data.serverY %></td>
+                <td>
+                    <% if(data.priceTime){ %>
+                    <span><%= data.priceTime.toLocaleDateString() %></span>
+                    <% }else{ %>
+                    未添加时间
+                    <% } %>
+                </td>
+                <td>
+                    <% if(data.endTime){ %>
+                    <span><%= data.endTime.toLocaleDateString() %></span>
+                    <% }else{ %>
+                    未添加时间
+                    <% } %>
+                </td>
+                <td><%= data.price %></td>
+                <td>
+                    <% if(data.priceInfo){ %>
+                    <span data-toggle="tooltip" data-placement="bottom" title="<%= data.priceInfo %>">
+                        <%= data.priceInfo.slice(0,15) %>....
+                    </span>
+                    <% } %>
+                </td>
+            </tr>
+        <% }) %>
+        <% } %>
+        </tbody>
+    </table>
+</form>
+<%- include public/cwfooter.html %>
+<script type="text/javascript">
+    //激活jq插件
+    $("[data-toggle='tooltip']").tooltip({
+        placement: 'left'
+    });
+</script>
