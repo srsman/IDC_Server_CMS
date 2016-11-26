@@ -65,15 +65,15 @@ module.exports = function(app) {
   app.post('/server/searchId',server.searchS);
   app.post('/server/searchIp',server.searchI);
   app.post('/server/cab',server.searchCab);
-
   //用户管理
   app.get('/createUser',validateLogin.noLogin,user.getUser);
+  app.post('/users/createServerUser',user.createServerUser);
   app.post('/users/createUser',user.createUser);
   app.post('/users/updateUser',user.updateUser);
   app.post('/users/up',user.Ups);
   app.post('/users/searchStrIp',user.searchStrIp);
   app.post('/users/searchIds',user.searchStrId);
-
+  app.post('/users/oneUsers',user.searchOneUser);
 
   //财务管理
   app.get('/skillfully',validateLogin.noLogin,validateLogin.youPrics,skillfully.getSkillfully);
@@ -85,6 +85,8 @@ module.exports = function(app) {
   app.get('/7day',validateLogin.noLogin,validateLogin.youPrics,skillfully.serveDay);
   //15天到期的服务器查询
   app.get('/15day',validateLogin.noLogin,validateLogin.youPrics,skillfully.twoFDay);
+  //已过期服务器查询
+  app.get('/serverTime',validateLogin.noLogin,validateLogin.youPrics,skillfully.getTimes);
   //服务器续费
   app.get('/serverPics',validateLogin.noLogin,validateLogin.youPrics,skillfully.serverPics);
   app.post('/server/serverPrice',skillfully.serverPrice);

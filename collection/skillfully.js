@@ -49,12 +49,11 @@ exports.thereDay = (req,res) => {
   let timeData = new Date();
   let getYear = timeData.getFullYear();
   let getMonth = timeData.getMonth()+1;
-  let getDate = timeData.getDate()+5;
-  if(getDate < 10){
-    getDate = '0'+getDate
+  let getDates = timeData.toString(timeData.setDate(timeData.getDate()+5));
+  if(getDates < 10){
+    getDates = '0'+getDates
   }
-  let time = new Date(getYear+'-'+getMonth+'-'+getDate);
-  let queryS = {'serverMark':true,endTime:{'$lte':time}};
+  let queryS = {'serverMark':true,endTime:{'$lte':getDates}};
   getIndexS(page,limits,req,res,queryS,toIndex)
 };
 
@@ -66,12 +65,11 @@ exports.serveDay = (req,res) => {
   let timeData = new Date();
   let getYear = timeData.getFullYear();
   let getMonth = timeData.getMonth()+1;
-  let getDate = timeData.getDate()+7;
-  if(getDate < 10){
-    getDate = '0'+getDate
+  let getDates = timeData.toString(timeData.setDate(timeData.getDate()+7));
+  if(getDates < 10){
+    getDates = '0'+getDates
   }
-  let time = new Date(getYear+'-'+getMonth+'-'+getDate);
-  let queryS = {'serverMark':true,endTime:{'$lte':time}};
+  let queryS = {'serverMark':true,endTime:{'$lte':getDates}};
   getIndexS(page,limits,req,res,queryS,toIndex)
 };
 
@@ -83,15 +81,23 @@ exports.twoFDay = (req,res) => {
   let timeData = new Date();
   let getYear = timeData.getFullYear();
   let getMonth = timeData.getMonth()+1;
-  let getDate = timeData.getDate()+15;
-  if(getDate < 10){
-    getDate = '0'+getDate
+  let getDates = timeData.toString(timeData.setDate(timeData.getDate()+15));
+  if(getDates < 10){
+    getDates = '0'+getDates
   }
-  let time = new Date(getYear+'-'+getMonth+'-'+getDate);
-  let queryS = {'serverMark':true,endTime:{'$lte':time}};
+  let queryS = {'serverMark':true,endTime:{'$lte':getDates}};
   getIndexS(page,limits,req,res,queryS,toIndex)
 };
-
+//----------------------------已过期服务器查询
+exports.getTimes = (req,res) => {
+  let page = req.query.page ? Number.parseInt(req.query.page) : 1;
+  let limits = 15;
+  let toIndex = 'serverTime';
+  let timeData = new Date();
+  console.log(timeData);
+  let queryS = {'serverMark':true,endTime:{'$lt':timeData}};
+  getIndexS(page,limits,req,res,queryS,toIndex)
+};
 //-----------------------------服务器续费Get路由
 exports.serverPics = (req,res) => {
   let page = req.query.page ? Number.parseInt(req.query.page) : 1;
@@ -110,7 +116,8 @@ exports.serverPics = (req,res) => {
         serverDocs: findData,
         isFirstPage: (page - 1) == 0,
         isLastPage: (page -1)*limits + Number.parseInt(findData.length) == total,
-        page: page
+        page: page,
+        maxPage : Math.floor((total + limits -1) / limits),
       });
     });
   });
@@ -155,7 +162,7 @@ function getIndexS(page,limits,req,res,queryS,toIndex){
     if(err){
       return res.json({'postStatus':'error','msg':'无法查询服务器总条数'})
     }
-    Server.find(queryS,null,{'skip':(page - 1)* limits,'limit':limits},(err,findData) => {
+    Server.find(queryS,null,{'skip':(page - 1)* limits,'limit':limits,'sort':{'endTime':1}},(err,findData) => {
       if(err){
         return res.json({'postStatus':'error','msg':'服务器查询出错，当前未有启用服务器'})
       }
@@ -165,7 +172,8 @@ function getIndexS(page,limits,req,res,queryS,toIndex){
         serverDocs: findData,
         isFirstPage: (page - 1) == 0,
         isLastPage: (page -1)*limits + Number.parseInt(findData.length) == total,
-        page: page
+        page: page,
+        maxPage : Math.floor((total + limits -1) / limits),
       });
     });
   });
@@ -194,7 +202,8 @@ exports.priceHost = (req,res) => {
             serverDocs: findData,
             isFirstPage: (page - 1) == 0,
             isLastPage: (page -1)*limits + Number.parseInt(findData.length) == total,
-            page: page
+            page: page,
+            maxPage : Math.floor((total + limits -1) / limits),
           });
         });
   });

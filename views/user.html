@@ -1,7 +1,6 @@
 <%- include public/adminHead.html %>
 <div class="only-p text-right">
   <div class="row">
-    <button type="button" class="createUser btn btn-default pull-right" data-toggle="modal" data-target="#createUser">新增用户</button>
     <div class="col-lg-6 col-md-6 col-sm-6 com-xs-6 pull-right">
       <div class="input-group">
         <div class="input-group-btn">
@@ -15,6 +14,10 @@
       </div>
     </div>
   </div>
+</div>
+<div class="btn-group pull-right" style="margin-bottom:10px;">
+  <button type="button" class="createUser btn btn-default pull-right" data-toggle="modal" data-target="#createUser">添加服务器</button>
+  <button type="button" class="createUE btn btn-default pull-right" data-toggle="modal" data-target="#createUE">新增用户</button>
 </div>
 <div id="tableBox">
   <form class="userBox" action="/userList" method="post">
@@ -85,7 +88,7 @@
   </form>
 </div>
 <!--新增用户开始-->
-<div id="createUser" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="createUseTitle" aria-hidden="true">
+<div id="createUE" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="createUseTitles" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <!--模态框内容开始-->
@@ -94,11 +97,11 @@
           <span aria-hidden="true">&times;</span>
           <span class="sr-only">Close</span>
         </button>
-        <h4 class="modal-title" id="createUseTitle">用户添加</h4>
+        <h4 class="modal-title" id="createUseTitles">用户添加</h4>
       </div>
       <div class="modal-body">
         <!--...................-->
-        <form class="saveUse" action="/saveUse" method="post">
+        <form class="saveSUse" action="/saveUseT" method="post">
           <!--用户表单开始-->
           <div class="form-group">
             <label for="webName">用户名称: </label>
@@ -123,6 +126,42 @@
           <div class="form-group">
             <label for="userAddress">联系人地址: </label>
             <input id="userAddress" class="form-control" type="text" name="userAddress">
+          </div>
+          <!--用户表单结束-->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button class="createServerUser btn btn-info">保存用户</button>
+      </div>
+      <!--模态框内容结束-->
+    </div>
+  </div>
+</div>
+<!--新增用户开始-->
+<div id="createUser" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="createUseTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!--模态框内容开始-->
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title" id="createUseTitle">服务添加</h4>
+      </div>
+      <div class="modal-body">
+        <!--...................-->
+        <form class="saveUse" action="/saveUse" method="post">
+          <!--用户表单开始-->
+          <div class="form-group">
+            <label for="createInputUser">输入用户名: </label>
+            <input type="text" class="form-control" name="createInputUser" id="createInputUser" placeholder="请输入需要模糊查询的用户名">
+          </div>
+          <div class="form-group">
+            <label for="ThisUsers">选择用户: </label>
+            <select name="ThisUsers" id="ThisUsers" class="form-control">
+            </select>
           </div>
           <div class="form-group">
             <label for="userPayment">联系人付款方式: </label>
@@ -155,7 +194,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-default" data-dismiss="modal">关闭</button>
-        <button class="createServer btn btn-info">保存用户</button>
+        <button class="createServer btn btn-info">保存业务</button>
       </div>
       <!--模态框内容结束-->
     </div>
@@ -254,6 +293,7 @@
       <th class="text-center">服务器</th>
       <th class="text-center">IP地址</th>
       <th class="text-center">是否付款</th>
+      <th class="text-center">更新</th>
     </tr>
     </thead>
     <tbody id="noS">
@@ -269,19 +309,34 @@
       <td class="text-center td9"></td>
       <td class="text-center td10"></td>
       <td class="text-center td11"></td>
+      <td class="text-center td12"></td>
     </tr>
     </tbody>
   </table>
 </div>
-
-<div class="btn-group pull-right" style="padding: 0 1%;">
-  <% if(!isFirstPage) { %>
-  <a class="pageBtn btn btn-default" href="?page=<%= page-1 %>">上一页</a>
+<nav class="pull-right" id="pageSizes" style="padding:0 1%">
+  <% if(maxPage !== 0){ %>
+  <ul class="pagination">
+    <% if(!isFirstPage){ %>
+    <li ><a href="?page=<%= page-1 %>">&laquo;</a></li>
+    <% }else{ %>
+    <li class="disabled"><span>&laquo;</span></li>
+    <% } %>
+    <li class="active"><a href="?page=1%>">1</a></li>
+    <% if(((page-page) + 2) > maxPage){ %>
+    <% }else{ %>
+    <li ><a href="?page=<%= (page-page) + 2%>"><%= (page-page) + 2 %></a></li>
+    <% } %>
+    <li><span>.....</span></li>
+    <li ><a href="?page=<%= (maxPage)%>"><%= maxPage %></a></li>
+    <% if(!isLastPage){ %>
+    <li ><a href="?page=<%= page+1 %>">&raquo;</a></li>
+    <% }else{ %>
+    <li class="disabled"><span>&raquo;</span></li>
+    <% } %>
+  </ul>
   <% } %>
-  <% if(!isLastPage) { %>
-  <a class="pageBtn btn btn-default" href="?&page=<%= page+1 %>">下一页</a>
-  <% } %>
-</div>
+</nav>
 <div class="ajaxMessage">
   <h4>提示信息</h4>
   <p class="ajaxText"></p>
@@ -302,6 +357,7 @@
         updateBtn = $('.updateBtn'),
         myUpdateBtn = $('.myUpdateBtn'),
         alertMessage = $('.ajaxMessage'),
+        createUser = $('.createServerUser'),
         ajaxContainer = alertMessage.find('.ajaxText'),
         ajaxClose = alertMessage.find('.ajaxDissmiss .btn');
     createBtn.bind('click',function(e){
@@ -340,8 +396,45 @@
         }
       });
     });
+    //--------------------------新建用户
+    createUser.bind('click',function(e){
+      e.preventDefault();
+      //打印表单信息
+      var formData = $('.saveSUse').serialize();
+      //发送ajax
+      $.ajax({
+        url:'/users/createServerUser',
+        type:'post',
+        dataType:'json',
+        data:formData,
+        success:function(data,status){
+          if(status == 'success'){
+            if(data.postStatus === 'success'){
+              //注册完成
+              alert(data.msg);
+              //准备跳转到指定页面
+              var urls = window.location.host,
+                urlPath = window.location.pathname;
+              return window.location.href = 'http://' + urls + urlPath;
+            }else{
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click',function(e){
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock')
+              });
+              return false;
+            }
+          }
+        },
+        error:function(err){
+          console.log(err)
+        }
+      });
+    });
     //--------------------------更新表单
-    updateBtn.bind('click',function(e){
+    $(document).on('click','.updateBtn',function(e){
       e.preventDefault();
       var _id = $(this).attr('data-id');
       $.ajax({
@@ -380,7 +473,7 @@
           console.log(err)
         }
       });
-    })
+    });
     //---------------更新数据
     myUpdateBtn.bind('click',function(e){
       e.preventDefault();
@@ -444,14 +537,16 @@
               if(data.msg.length <= 0){
                 alert('此ID用户编号关联不存在')
               }else{
+                $('#pageSizes').css('display','none');
                 var userData = data.msg,
                   _html = '',
                   _ip = '',
-                  _payMent = '';
+                  _payMent = '',
+                  _serverId = '';
                 userData.forEach(function(data,index){
                   $('.tabList').css({'display':'none'});
                   $('.ajaxCallback').css({'display':'block'});
-                  if(data.user.serverTo.ip){
+                  if(data.user.serverTo){
                     _ip = data.user.serverTo.ip;
                   }else{
                     _ip = '当前未配置IP地址';
@@ -461,18 +556,24 @@
                   }else{
                     _payMent = '未付款';
                   }
+                  if(data.user.serverTo == null){
+                    _serverId = '未填写ID';
+                  }else{
+                    _serverId = data.user.serverTo.serverId;
+                  }
                   var _temp = '<tr class="text-center">' +
                     '<td>'+ data.user.webName +'</td>' +
                     '<td>'+ data.user.username +'</td>' +
                     '<td>'+ data.user.userCarded +'</td>' +
-                    '<td>'+ data.user.userPayment +'</td>' +
+                    '<td>'+ data.user.userPhoneNumber +'</td>' +
                     '<td>'+ data.user.userQQ +'</td>' +
                     '<td>'+ data.user.userAddress +'</td>' +
                     '<td>'+ data.user.userPayment +'</td>' +
                     '<td>'+ data.user.userTo +'</td>' +
-                    '<td><a href="/server/'+ data.user.serverTo.serverId + '">'+ data.user.serverTo.serverId +'</a></td>' +
+                    '<td><a href="/server/'+ _serverId + '">'+ _serverId +'</a></td>' +
                     '<td>'+ _ip + '</td>' +
                     '<td>'+ _payMent +'</td>' +
+                    '<td><a class="updateBtn" data-toggle="modal" data-target="#updateBox" data-id="'+data._id+'"><i class="fa fa-edit"></a></td>' +
                     '</tr>';
                   _html += _temp;
                 });
@@ -515,6 +616,7 @@
               if(data.msg == null){
                 alert('此IP地址编号关联不存在')
               }else{
+                $('#pageSizes').css('display','none');
                 var userData = data.msg,
                   _html = '';
                 $('.tabList').css({'display':'none'});
@@ -522,7 +624,7 @@
                 $('.searchB .td1').html(userData.user.webName);
                 $('.searchB .td2').html(userData.user.username);
                 $('.searchB .td3').html(userData.user.userCarded);
-                $('.searchB .td4').html(userData.user.userPayment);
+                $('.searchB .td4').html(userData.user.userPhoneNumber);
                 $('.searchB .td5').html(userData.user.userQQ);
                 $('.searchB .td6').html(userData.user.userAddress);
                 $('.searchB .td7').html(userData.user.userPayment);
@@ -542,6 +644,7 @@
                 }else{
                   $('.searchB .td11').html('未付款');
                 }
+                $('.searchB .td12').html('<a class="updateBtn" data-toggle="modal" data-target="#updateBox" data-id="'+userData._id+'"><i class="fa fa-edit"></a>');
               }
             }else{
               //返回ajax回调信息
@@ -562,5 +665,61 @@
         }
       });
     }
+    //模糊查询
+    $('#createInputUser').bind('change',function(){
+      var _thisVal = $(this).val();
+      $.ajax({
+        url: '/users/oneUsers',
+        type:'post',
+        dataType: 'json',
+        data:{
+          usernameS: _thisVal
+        },
+        success:function(data,status){
+          //返回值判断
+          if(status == 'success'){
+            //ajax发送成功
+            if(data.postStatus == 'success'){
+              if(data.msg.length <= 0){
+                alert('无用户信息')
+              }else{
+                var newData = data.msg;
+                var arr = [],
+                    thisArr = [],
+                    _html = '',
+                    _temp = '';
+                newData.forEach(function(item){
+                  arr.push(item.user.webName);
+                });
+                arr.forEach(function(dataName){
+                  if(thisArr.indexOf(dataName) == -1){
+                    thisArr.push(dataName);
+                  }
+                });
+                thisArr.forEach(function(itemName){
+                  _temp = '<option value="'+ itemName +'">'+ itemName +'</option>';
+                  _html += _temp;
+                })
+                $('#ThisUsers').html(_html);
+              };
+            }else{
+              //返回ajax回调信息
+              alertMessage.addClass('AjaxBlock');
+              ajaxContainer.text(data.msg);
+              ajaxClose.on('click',function(e){
+                e.stopPropagation();
+                alertMessage.removeClass('AjaxBlock')
+              });
+              return false;
+            }
+          }else{
+            return false;
+          }
+        },
+        error:function(error){
+          console.log(error);
+        }
+      })
+    })
   });
 </script>

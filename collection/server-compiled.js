@@ -45,7 +45,8 @@ exports.getServer = function (req, res) {
               cabDocs: cabData,
               isFirstPage: page - 1 == 0,
               isLastPage: (page - 1) * limits + Number.parseInt(serverInfo.length) == total,
-              page: page
+              page: page,
+              maxPage: Math.floor((total + limits - 1) / limits)
             });
           });
         });
@@ -186,6 +187,7 @@ exports.deleteId = function (req, res) {
     if (err) {
       return res.json({ 'postStatus': 'error', 'msg': '服务器删除失败' });
     }
+    //console.log(data.ip);
     //准备更新IP地址数据
     Uip.update({ 'ip': { '$in': data.ip } }, { 'ipMark': false, 'server': '' }, { multi: true }, function (err, updateDatas) {
       if (err) {
@@ -219,15 +221,15 @@ exports.getIps = function (req, res) {
 //-----------------server联动查询获取ip地址
 exports.getIP = function (req, res) {
   //获取表单数据
-  //var uip = req.query['big_id'];
+  //let uip = req.query['big_id'];
   var useId = req.query.use;
   if (useId == '') {
     return console.log('请选择ip地址段以及ip地址用途,在进行操作');
   };
-  //var ips = mongoose.Types.ObjectId(uip);
+  //let ips = mongoose.Types.ObjectId(uip);
   var use = mongoose.Types.ObjectId(useId);
   //查询ip表数据库
-  Uip.find({'ipUse': use, 'ipMark': 'false', 'ipDisplay': 'true' }, null, function (err, ipData) {
+  Uip.find({ 'ipUse': use, 'ipMark': 'false', 'ipDisplay': 'true' }, null, function (err, ipData) {
     if (err) {
       return res.json({ 'postStatus': 'error', 'msg': 'ip地址查询出错' });
     }
@@ -455,6 +457,7 @@ exports.searchS = function (req, res) {
   if (id.length <= 0) {
     return res.json({ 'postStatus': 'error', 'msg': '服务器编号不能为空' });
   }
+  id = id.trim();
   Server.findOne({ 'serverId': id }, null, function (err, searchData) {
     if (err) {
       return res.json({ 'postStatus': 'error', 'msg': '查询服务器失败' });
@@ -467,6 +470,7 @@ exports.searchI = function (req, res) {
   if (id.length <= 0) {
     return res.json({ 'postStatus': 'error', 'msg': '服务器IP不能为空' });
   }
+  id = id.trim();
   //判断传入值是否存在','
   if (id.includes(',')) {
     //存在截取字符串
@@ -490,6 +494,7 @@ exports.searchCab = function (req, res) {
   if (id.length <= 0) {
     return res.json({ 'postStatus': 'error', 'msg': '机柜编号不能为空' });
   }
+  id = id.trim().toUpperCase();
   Cabinets.findOne({ 'cabinetsId': id }, null, function (err, getId) {
     if (err) {
       return res.json({ 'postStatus': 'error', 'msg': '服务器机柜查询出错' });
@@ -506,25 +511,6 @@ exports.searchCab = function (req, res) {
       });
     };
   });
-  // Server
-  //   .find()
-  //   .populate({
-  //     path:'serverCab',
-  //     match:{'cabinetsId':id}
-  //   })
-  //   .exec((err,searchData) => {
-  //     if(err){
-  //       return res.json({'postStatus':'error','msg':'查询服务器失败可能未与IP地址关联'});
-  //     }
-  //     console.log(searchData)
-  //     return res.json({'postStatus':'success','msg':searchData});
-  //   });
-  // Server.findOne({'ip':{'$in':id}},null,(err,searchData) => {
-  //   if(err){
-  //     return res.json({'postStatus':'error','msg':'查询服务器失败可能未与IP地址关联'});
-  //   }
-  //   return res.json({'postStatus':'success','msg':searchData});
-  // });
 };
 
 //# sourceMappingURL=server-compiled.js.map

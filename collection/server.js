@@ -41,7 +41,8 @@ exports.getServer = (req,res) => {
                 cabDocs:cabData,
                 isFirstPage: (page - 1) == 0,
                 isLastPage: (page -1)*limits + Number.parseInt(serverInfo.length) == total,
-                page: page
+                page: page,
+                maxPage : Math.floor((total + limits -1) / limits),
               });
             });
         });
@@ -459,6 +460,7 @@ exports.searchS = (req,res) => {
     if(id.length <= 0){
         return res.json({'postStatus':'error','msg':'服务器编号不能为空'});
     }
+	id = id.trim();
     Server.findOne({'serverId':id},null,(err,searchData) => {
         if(err){
             return res.json({'postStatus':'error','msg':'查询服务器失败'});
@@ -471,6 +473,7 @@ exports.searchI = (req,res) => {
     if(id.length <= 0){
         return res.json({'postStatus':'error','msg':'服务器IP不能为空'});
     }
+	id = id.trim();
     //判断传入值是否存在','
     if(id.includes(',')){
         //存在截取字符串
@@ -494,42 +497,24 @@ exports.searchCab = (req,res) => {
   if(id.length <= 0){
     return res.json({'postStatus':'error','msg':'机柜编号不能为空'});
   }
+  id = id.trim().toUpperCase();
   Cabinets.findOne({'cabinetsId':id},null,(err,getId) => {
     if(err){
       return res.json({'postStatus':'error','msg':'服务器机柜查询出错'});
     }
-    if(getId == null){
-      return res.json({'postStatus': 'success', 'msg': getId});
-    }else {
-      let ids = mongoose.Types.ObjectId(getId._id);
-      Server
-        .find({'serverCab': ids})
-        .populate('serverCab')
-        .exec((err, searchData) => {
-          if (err) {
-            return res.json({'postStatus': 'error', 'msg': '查询服务器失败可能未与IP地址关联'});
-          }
-          return res.json({'postStatus': 'success', 'msg': searchData});
-        });
-    };
+		if(getId == null){
+		  return res.json({'postStatus': 'success', 'msg': getId});
+		}else {
+		  let ids = mongoose.Types.ObjectId(getId._id);
+		  Server
+			.find({'serverCab': ids})
+			.populate('serverCab')
+			.exec((err, searchData) => {
+			  if (err) {
+				return res.json({'postStatus': 'error', 'msg': '查询服务器失败可能未与IP地址关联'});
+			  }
+			  return res.json({'postStatus': 'success', 'msg': searchData});
+			});
+		};
     });
-  // Server
-  //   .find()
-  //   .populate({
-  //     path:'serverCab',
-  //     match:{'cabinetsId':id}
-  //   })
-  //   .exec((err,searchData) => {
-  //     if(err){
-  //       return res.json({'postStatus':'error','msg':'查询服务器失败可能未与IP地址关联'});
-  //     }
-  //     console.log(searchData)
-  //     return res.json({'postStatus':'success','msg':searchData});
-  //   });
-  // Server.findOne({'ip':{'$in':id}},null,(err,searchData) => {
-  //   if(err){
-  //     return res.json({'postStatus':'error','msg':'查询服务器失败可能未与IP地址关联'});
-  //   }
-  //   return res.json({'postStatus':'success','msg':searchData});
-  // });
 };

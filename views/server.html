@@ -193,11 +193,6 @@
               <% } %>
             </select>
           </div>
-          <!--<div class="form-group serverIpAddress">
-            <label for="serverIpAddress">服务器IP段选择: </label>
-            <select name="serverIpAddress" id="serverIpAddress" class="form-control">
-            </select>
-          </div>-->
           <div class="form-group serverUse">
             <label for="serverUse">服务器用途: </label>
             <select name="serverUse" id="serverUse" class="form-control">
@@ -394,6 +389,7 @@
       <th class="text-center">续费时间</th>
       <th class="text-center">续费价格</th>
       <th class="text-center">管理</th>
+      <th class="text-center">更新/删除</th>
     </tr>
     </thead>
     <tbody id="noS">
@@ -409,20 +405,34 @@
         <td class="text-center td9"></td>
         <td class="text-center td10"></td>
         <td class="text-center td11"></td>
+        <td class="text-center td12"></td>
       </tr>
     </tbody>
   </table>
 </div>
 
 <!--第二块表格-->
-<div class="btn-group pull-right" style="padding: 0 1%;">
-  <% if(!isFirstPage) { %>
-  <a class="pageBtn btn btn-default" href="?page=<%= page-1 %>">上一页</a>
-  <% } %>
-  <% if(!isLastPage) { %>
-  <a class="pageBtn btn btn-default" href="?&page=<%= page+1 %>">下一页</a>
-  <% } %>
-</div>
+<nav class="pull-right" id="pageSizes">
+  <ul class="pagination">
+    <% if(!isFirstPage){ %>
+    <li ><a href="?page=<%= page-1 %>">&laquo;</a></li>
+    <% }else{ %>
+    <li class="disabled"><span>&laquo;</span></li>
+    <% } %>
+    <li class="active"><a href="/server">1</a></li>
+    <% if(((page-page) + 2) > maxPage){ %>
+    <% }else{ %>
+    <li ><a href="?page=<%= (page-page) + 2%>"><%= (page-page) + 2 %></a></li>
+    <% } %>
+    <li><span>.....</span></li>
+    <li ><a href="?page=<%= (maxPage)%>"><%= maxPage %></a></li>
+    <% if(!isLastPage){ %>
+    <li ><a href="?page=<%= page+1 %>">&raquo;</a></li>
+    <% }else{ %>
+    <li class="disabled"><span>&raquo;</span></li>
+    <% } %>
+  </ul>
+</nav>
 <!--ajax回调信息-->
 <div class="ajaxMessage">
   <h4>提示信息</h4>
@@ -449,7 +459,6 @@
     createBtn.bind('click',function(e){
       e.stopPropagation();
       var formData = modalData.serialize();
-//      console.log(formData);
       //发送ajax数据
       $.ajax({
         type:'post',
@@ -521,16 +530,6 @@
         }
       });
     });
-    //表单二级查询
-//  $('#serverModal #serverIpAddress').bind('change',function(){
-//    var thisVal = $(this).val();
-//    if(thisVal !== ''){
-//      $('#serverModal .serverUse').addClass('trueBlock');
-//    }else {
-//      $('#serverModal .serverUse').removeClass('trueBlock');
-//      $('#serverModal .serverIP').removeClass('trueBlock');
-//    }
-//  });
     //表单三级查询
     $('#serverModal #serverUse').bind('change',function(){
 //    var ips = $('#serverModal #serverIpAddress').val();
@@ -570,7 +569,7 @@
       })
     });
     //------------------删除信息
-    deleteBtn.bind('click',function(e){
+    $(document).on('click','.deleteBtn',function(e){
       e.stopPropagation();
       var thisUrl = $(this).attr('href');
       if(confirm('您确定要删除此数据吗?')){
@@ -723,7 +722,7 @@
       };
     });
     //---------------------表单更新
-    updateBtn.bind('click',function(e){
+    $(document).on('click','.updateBtn',function(e){
       e.preventDefault();
       //获取id
       var id = $(this).attr('data-id');
@@ -844,6 +843,7 @@
               if(data.msg == null){
                 alert('查询失败此服务器不存在')
               }else{
+                $('#pageSizes').css('display','none');
                 //更新页面
                 $('.tabList').css({'display':'none'});
                 $('.ajaxCallback').css({'display':'block'});
@@ -907,6 +907,7 @@
                       '<td>'+ spans +'</td>' +
                       '<td>'+ gf +'</td>' +
                       '<td><a href="'+ urls +'">管理</a></td>' +
+                      '<td><a class="updateBtn" data-toggle="modal" data-target="#updateBox" data-id="'+data._id+'" href=""> <i class="fa fa-edit"></i> </a> <a class="deleteBtn" href="/servers/delete?id='+data._id+'"> <i class="fa fa-trash-o"></i> </a></td>' +
                       '</tr>';
                     _tr += temp;
                   });
@@ -946,6 +947,7 @@
               if(data.msg == null){
                 alert('查询失败此服务器不存在')
               }else{
+                $('#pageSizes').css('display','none');
                 //更新页面
                 $('.tabList').css({'display':'none'});
                 $('.ajaxCallback').css({'display':'block'});
@@ -994,6 +996,7 @@
                 }else{
                   $('.searchB .td11').html('未填写管理地址');
                 }
+                $('.searchB .td12').html('<a class="updateBtn" data-toggle="modal" data-target="#updateBox" data-id="'+data.msg._id+'" href=""> <i class="fa fa-edit"></i> </a> <a class="deleteBtn" href="/servers/delete?id='+data.msg._id+'"> <i class="fa fa-trash-o"></i> </a>')
               }
             }else{
               //返回ajax回调信息

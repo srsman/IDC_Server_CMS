@@ -50,12 +50,11 @@ exports.thereDay = function (req, res) {
   var timeData = new Date();
   var getYear = timeData.getFullYear();
   var getMonth = timeData.getMonth() + 1;
-  var getDate = timeData.getDate() + 5;
-  if (getDate < 10) {
-    getDate = '0' + getDate;
+  var getDates = timeData.toString(timeData.setDate(timeData.getDate() + 5));
+  if (getDates < 10) {
+    getDates = '0' + getDates;
   }
-  var time = new Date(getYear + '-' + getMonth + '-' + getDate);
-  var queryS = { 'serverMark': true, endTime: { '$lte': time } };
+  var queryS = { 'serverMark': true, endTime: { '$lte': getDates } };
   getIndexS(page, limits, req, res, queryS, toIndex);
 };
 
@@ -67,12 +66,11 @@ exports.serveDay = function (req, res) {
   var timeData = new Date();
   var getYear = timeData.getFullYear();
   var getMonth = timeData.getMonth() + 1;
-  var getDate = timeData.getDate() + 7;
-  if (getDate < 10) {
-    getDate = '0' + getDate;
+  var getDates = timeData.toString(timeData.setDate(timeData.getDate() + 7));
+  if (getDates < 10) {
+    getDates = '0' + getDates;
   }
-  var time = new Date(getYear + '-' + getMonth + '-' + getDate);
-  var queryS = { 'serverMark': true, endTime: { '$lte': time } };
+  var queryS = { 'serverMark': true, endTime: { '$lte': getDates } };
   getIndexS(page, limits, req, res, queryS, toIndex);
 };
 
@@ -84,15 +82,23 @@ exports.twoFDay = function (req, res) {
   var timeData = new Date();
   var getYear = timeData.getFullYear();
   var getMonth = timeData.getMonth() + 1;
-  var getDate = timeData.getDate() + 15;
-  if (getDate < 10) {
-    getDate = '0' + getDate;
+  var getDates = timeData.toString(timeData.setDate(timeData.getDate() + 15));
+  if (getDates < 10) {
+    getDates = '0' + getDates;
   }
-  var time = new Date(getYear + '-' + getMonth + '-' + getDate);
-  var queryS = { 'serverMark': true, endTime: { '$lte': time } };
+  var queryS = { 'serverMark': true, endTime: { '$lte': getDates } };
   getIndexS(page, limits, req, res, queryS, toIndex);
 };
-
+//----------------------------已过期服务器查询
+exports.getTimes = function (req, res) {
+  var page = req.query.page ? Number.parseInt(req.query.page) : 1;
+  var limits = 15;
+  var toIndex = 'serverTime';
+  var timeData = new Date();
+  console.log(timeData);
+  var queryS = { 'serverMark': true, endTime: { '$lt': timeData } };
+  getIndexS(page, limits, req, res, queryS, toIndex);
+};
 //-----------------------------服务器续费Get路由
 exports.serverPics = function (req, res) {
   var page = req.query.page ? Number.parseInt(req.query.page) : 1;
@@ -111,7 +117,8 @@ exports.serverPics = function (req, res) {
         serverDocs: findData,
         isFirstPage: page - 1 == 0,
         isLastPage: (page - 1) * limits + Number.parseInt(findData.length) == total,
-        page: page
+        page: page,
+        maxPage: Math.floor((total + limits - 1) / limits)
       });
     });
   });
@@ -156,7 +163,7 @@ function getIndexS(page, limits, req, res, queryS, toIndex) {
     if (err) {
       return res.json({ 'postStatus': 'error', 'msg': '无法查询服务器总条数' });
     }
-    Server.find(queryS, null, { 'skip': (page - 1) * limits, 'limit': limits }, function (err, findData) {
+    Server.find(queryS, null, { 'skip': (page - 1) * limits, 'limit': limits, 'sort': { 'endTime': 1 } }, function (err, findData) {
       if (err) {
         return res.json({ 'postStatus': 'error', 'msg': '服务器查询出错，当前未有启用服务器' });
       }
@@ -166,7 +173,8 @@ function getIndexS(page, limits, req, res, queryS, toIndex) {
         serverDocs: findData,
         isFirstPage: page - 1 == 0,
         isLastPage: (page - 1) * limits + Number.parseInt(findData.length) == total,
-        page: page
+        page: page,
+        maxPage: Math.floor((total + limits - 1) / limits)
       });
     });
   });
@@ -190,7 +198,8 @@ exports.priceHost = function (req, res) {
         serverDocs: findData,
         isFirstPage: page - 1 == 0,
         isLastPage: (page - 1) * limits + Number.parseInt(findData.length) == total,
-        page: page
+        page: page,
+        maxPage: Math.floor((total + limits - 1) / limits)
       });
     });
   });

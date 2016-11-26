@@ -21,42 +21,56 @@ exports.getUser = (req,res) => {
       if(err){
         return res.json({'postStatus':'error','msg':'总页数查询失败'});
       }
-      User.find({'user.search':true}).skip((page - 1)*limits).limit(limits).populate('user.serverTo').exec((err,usersDocs) => {
+      User.find({'user.createUser':true},{'user.webName':1},(err,thisUser) => {
         if(err){
-          return res.json({'postStatus':'error','msg':'用户查询出错'})
+          return res.json({'postStatus':'error','msg':'无用户'});
         }
-        return res.render('user',{
-          title:'用户管理',
-          session : req.session.username,
-          serverData: serverDocs,
-          usersData: usersDocs,
-          isFirstPage: (page - 1) == 0,
-          isLastPage: (page -1)*limits + Number.parseInt(usersDocs.length) == total,
-          page: page
+        User.find({'user.search':true}).skip((page - 1)*limits).limit(limits).populate('user.serverTo').sort({'_id':-1}).exec((err,usersDocs) => {
+          if(err){
+            return res.json({'postStatus':'error','msg':'用户查询出错'})
+          }
+          return res.render('user',{
+            title:'用户管理',
+            session : req.session.username,
+            serverData: serverDocs,
+            usersData: usersDocs,
+            isFirstPage: (page - 1) == 0,
+            isLastPage: (page -1)*limits + Number.parseInt(usersDocs.length) == total,
+            page: page,
+            thisDocs: thisUser,
+            maxPage : Math.floor((total + limits -1) / limits),
+          });
         });
       });
     });
   });
 };
-//写入新数据
-exports.createUser = (req,res) => {
+
+//----------------查找某用户
+exports.searchOneUser = (req,res) => {
+  let username = req.body.usernameS;
+  if(username == '' || username == undefined){
+    return res.json({'postStatus':'error','msg':'无法识别,用户名不能为空'})
+  };
+  User.find({'user.createUser':true,'user.webName':new RegExp(username)},{'user.webName':1},(err,thisUser) => {
+    if(err){
+      return res.json({'postStatus':'error','msg':'无用户'});
+    }
+    return res.json({'postStatus':'success','msg':thisUser});
+  });
+};
+//---------------写入用户
+exports.createServerUser = (req,res) => {
   //获取表单数据
-  let webName = req.body.webName;
+  let webName = req.body.webName.trim();
   let username = req.body.username;
   let userCarded = req.body.userCarded;
   let userPhoneNumber = req.body.userPhoneNumber;
   let userQQ = req.body.userQQ;
   let userAddress = req.body.userAddress;
-  let userPayment = req.body.userPayment;
-  let userTo = req.body.userTo;
-  let serverTo = req.body.serverTo ? req.body.serverTo : '';
-  let isPayment = req.body.isPayment;
-  let time = new Date();
-  let endTime = req.body.endTime;
   if(webName == '' || webName == null){
     return res.json({'postStatus':'error','msg':'用户名称不能为空'})
   }
-  //更新当前服务器数据
   User.create({
     'user.webName':webName,
     'user.username':username,
@@ -64,32 +78,78 @@ exports.createUser = (req,res) => {
     'user.userPhoneNumber':userPhoneNumber,
     'user.userQQ':userQQ,
     'user.userAddress':userAddress,
-    'user.userPayment':userPayment,
-    'user.userTo':userTo,
-    'user.serverTo':serverTo,
-    'user.isPayment':isPayment,
-    'user.search':true,
-  },(err,createData) => {
+    'user.createUser':true,
+  },(err,createServerUser) => {
     if(err){
       return res.json({'postStatus':'error','msg':'用户新增出错'})
     }
-    //更新服务器信息
-    Server.update({'_id':serverTo},{'serverMark':true,'startTime':time,'endTime':endTime},(err,updateInfo) => {
+    return res.json({'postStatus':'success','msg':'用户添加完成'});
+  });
+};
+//写入新数据
+exports.createUser = (req,res) => {
+  //获取表单数据
+  let ThisUsers = req.body.ThisUsers;
+  let userPayment = req.body.userPayment;
+  let userTo = req.body.userTo;
+  let serverTo = req.body.serverTo ? req.body.serverTo : '';
+  let isPayment = req.body.isPayment;
+  let time = new Date();
+  let endTime = req.body.endTime;
+  let webName = null;
+  let username = null;
+  let userCarded = null;
+  let userPhoneNumber = null;
+  let userQQ = null;
+  let userAddress = null;
+  //获取用户信息
+  User.findOne({'user.webName':ThisUsers},{'user':1},(err,dataS) => {
       if(err){
-        return res.json({'postStatus':'error','msg':'服务器更新出错'})
-      }
-      Server.findById({'_id':serverTo},{'ip':1},(err,dataIp) => {
-        if(err){
-          return res.json({'postStatus':'error','msg':'服务器查询IP出错'})
-        };
-        User.update({'_id':createData._id},{'user.uip':dataIp.ip},(err,updateIps) => {
+        return res.json({'postStatus':'error','msg':'用户信息查询失败'});
+      }else{
+        webName = dataS.user.webName;
+        username = dataS.user.username;
+        userCarded = dataS.user.userCarded;
+        userPhoneNumber = dataS.user.userPhoneNumber;
+        userQQ = dataS.user.userQQ;
+        userAddress = dataS.user.userAddress;
+        createUser = dataS.user.createUser;
+        //更新当前服务器数据
+        User.create({
+          'user.webName':webName,
+          'user.username':username,
+          'user.userCarded':userCarded,
+          'user.userPhoneNumber':userPhoneNumber,
+          'user.userQQ':userQQ,
+          'user.userAddress':userAddress,
+          'user.userPayment':userPayment,
+          'user.userTo':userTo,
+          'user.serverTo':serverTo,
+          'user.isPayment':isPayment,
+          'user.search':true,
+        },(err,createData) => {
           if(err){
-            return res.json({'postStatus':'error','msg':'用户写入IP出错'})
+            return res.json({'postStatus':'error','msg':'用户新增出错'})
           }
-          return res.json({'postStatus':'success','msg':'用户新增完成'})
+          //更新服务器信息
+          Server.update({'_id':serverTo},{'serverMark':true,'startTime':time,'endTime':endTime},(err,updateInfo) => {
+            if(err){
+              return res.json({'postStatus':'error','msg':'服务器更新出错'})
+            }
+            Server.findById({'_id':serverTo},{'ip':1},(err,dataIp) => {
+              if(err){
+                return res.json({'postStatus':'error','msg':'服务器查询IP出错'})
+              };
+              User.update({'_id':createData._id},{'user.uip':dataIp.ip},(err,updateIps) => {
+                if(err){
+                  return res.json({'postStatus':'error','msg':'用户写入IP出错'})
+                }
+                return res.json({'postStatus':'success','msg':'用户新增完成'})
+              });
+            });
+          });
         });
-      });
-    });
+      };
   });
 };
 
@@ -245,6 +305,7 @@ exports.searchStrId = (req,res) => {
   if(id.length <= 0){
     return res.json({'postStatus':'error','msg':'用户平台名称不能为空'})
   }
+  id = id.trim();
   User
     .find({'user.search':true,'user.webName':id})
     .populate({
